@@ -1,5 +1,5 @@
 // import { PrismaClient } from '@prisma/client';
-// import bcrypt from 'bcrypt';;
+// import bcrypt from 'bcrypt';
 
 // const prisma = new PrismaClient();
 
@@ -12,3 +12,9 @@
 //         role // Récupérer le rôle depuis le formulaire
 //     }
 // });
+
+export default function RegisterPage() {
+return (
+    <p>Register Page</p>
+)
+}
