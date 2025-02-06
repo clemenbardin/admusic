@@ -1,20 +1,22 @@
 import { createClient } from "@supabase/supabase-js";
+import { bcrypt } from 'bcrypt';
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function seed() {
-  // Insertion des utilisateurs
+  const hashedPassword = await bcrypt.hash("password", 10);
+
   const { data: users, error: userError } = await supabase.from("users").upsert([
-    { id: "user1", email: "admin@example.com", password: "password", name: "Admin", role: "admin", createdAt: new Date() },
-    { id: "user2", email: "prof@example.com", password: "password", name: "Professeur", role: "professeur", createdAt: new Date() },
-    { id: "user3", email: "eleve@example.com", password: "password", name: "Élève", role: "eleve", createdAt: new Date() },
+      { id: "user1", email: "admin@example.com", password: hashedPassword, name: "Admin", role: "admin", createdAt: new Date() },
+      { id: "user2", email: "prof@example.com", password: hashedPassword, name: "Professeur", role: "professeur", createdAt: new Date() },
+      { id: "user3", email: "eleve@example.com", password: hashedPassword, name: "Élève", role: "eleve", createdAt: new Date() },
   ]);
 
   if (userError) {
-    console.error("Erreur lors de l'insertion des utilisateurs:", userError);
-    return;
+      console.error("Erreur lors de l'insertion des utilisateurs:", userError);
+      return;
   }
 
   console.log("Utilisateurs insérés:", users);

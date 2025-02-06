@@ -47,6 +47,7 @@ export default function LoginPage() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            placeholder='Entrez votre e-mail...'
                             className="w-full p-3 mt-1 border rounded-md"
                         />
                     </div>
@@ -58,6 +59,7 @@ export default function LoginPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            placeholder='Choisissez votre mot de passe...'
                             className="w-full p-3 mt-1 border rounded-md"
                         />
                     </div>

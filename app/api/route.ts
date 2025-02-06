@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+import { supabase } from "../lib/db";
 
 export async function POST(req: Request) {
     try {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from 'next/navigation';
-import Link from "next/link";
+import { supabase } from "../../lib/db";
 
 export default function RegisterPage() {
     const [email, setEmail] = useState('');
@@ -13,9 +13,8 @@ export default function RegisterPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError(null); // Réinitialiser les erreurs
+        setError(null);
 
-        // Vérification basique des champs
         if (!email || !password || !confirmPassword) {
             setError("Tous les champs sont requis.");
             return;
@@ -30,7 +29,7 @@ export default function RegisterPage() {
         }
 
         try {
-            const res = await fetch('/api/auth/register', {
+            const res = await fetch('/app/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
@@ -38,7 +37,7 @@ export default function RegisterPage() {
 
             if (res.ok) {
                 console.log("Inscription réussie !");
-                router.push('/login'); // Redirection après succès
+                router.push('/login');
             } else {
                 const data = await res.json();
                 setError(data.message || "Une erreur s'est produite.");
@@ -94,8 +93,7 @@ export default function RegisterPage() {
 
                     <button
                         type="submit"
-                        className="w-full py-3 bg-blue-600 text-white font-semibold rounded-l"
-                    />
+                        className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg">S'enregistrer</button>
                 </form>
             </div>
         </div>

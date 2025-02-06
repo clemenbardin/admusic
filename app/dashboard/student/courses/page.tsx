@@ -1,54 +1,85 @@
-'use client';
+'use client'
 
-import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
-import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../../../lib/db';
 
 export default function Dashboard() {
-    const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+  const [courses, setCourses] = useState([]);
+  const [progresses, setProgresses] = useState([]);
 
-    export async function GET() {
-        const { data, error } = await supabase.from("courses").select("*");
+  useEffect(() => {
+    // Récupérer les cours inscrits pour l'élève connecté
+    const fetchCourses = async () => {
+      const user = supabase.auth.user();
 
-        if (error) {
-            return NextResponse.json({ message: "Erreur de récupération des cours." }, { status: 500 });
-        }
-    
-        return NextResponse.json(data, { status: 200 });
-    }
-    }
+      if (!user) return;  // Si pas d'utilisateur connecté, ne rien faire
 
-    const { data: session } = useSession();
-    const [courses, setCourses] = useState([]);
+      const { data: enrollments, error: enrollError } = await supabase
+        .from('enrollments')
+        .select('courseId')
+        .eq('studentId', user.id);
 
-    useEffect(() => {
-        const fetchCourses = async () => {
-            const res = await fetch('/api/courses');
-            const data = await res.json();
-            setCourses(data);
-        };
+      if (enrollError) {
+        console.error('Erreur de récupération des inscriptions:', enrollError);
+        return;
+      }
 
-        fetchCourses();
-    }, []);
+      const courseIds = enrollments.map((enrollment) => enrollment.courseId);
+      const { data: coursesData, error: courseError } = await supabase
+        .from('courses')
+        .select('*')
+        .in('id', courseIds);
 
-    return (
-        <div className="p-6">
-            <h1 className="text-3xl font-bold">Bienvenue, {session?.user?.email} 👋</h1>
+      if (courseError) {
+        console.error('Erreur de récupération des cours:', courseError);
+        return;
+      }
 
-            <h2 className="mt-4 text-xl font-semibold">Liste des cours</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                {courses.map((course: any) => (
-                    <div key={course.id} className="p-4 bg-white shadow-lg rounded-lg">
-                        <h3 className="text-lg font-semibold">{course.title}</h3>
-                        <p className="text-sm text-gray-600">{course.description}</p>
-                        <p className="mt-2 text-blue-500">{course.instrument} - {course.level}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+      setCourses(coursesData);
+    };
+
+    const fetchProgress = async () => {
+      const user = supabase.auth.user();
+      if (!user) return;
+
+      const { data: progressData, error: progressError } = await supabase
+        .from('progress')
+        .select('*')
+        .eq('studentId', user.id);
+
+      if (progressError) {
+        console.error('Erreur de récupération des progrès:', progressError);
+        return;
+      }
+
+      setProgresses(progressData);
+    };
+
+    fetchCourses();
+    fetchProgress();
+  }, []);
+
+  return (
+    <div>
+      <h1>Tableau de bord</h1>
+
+      <h2>Cours inscrits</h2>
+      <ul>
+        {courses.map((course) => (
+          <li key={course.id}>
+            {course.title} - {course.schedule}
+          </li>
+        ))}
+      </ul>
+
+      <h2>Suivi de progression</h2>
+      <ul>
+        {progresses.map((progress) => (
+          <li key={progress.id}>
+            {progress.courseId} - Évaluation: {progress.evaluation} - Commentaires: {progress.comments}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }

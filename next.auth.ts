@@ -21,7 +21,6 @@ const authOptions = {
           throw new Error("Veuillez entrer un email et un mot de passe.");
         }
 
-        // Chercher l'utilisateur dans Supabase
         const { data: user, error } = await supabase
           .from("users")
           .select("*")
@@ -32,7 +31,6 @@ const authOptions = {
           throw new Error("Utilisateur non trouvé.");
         }
 
-        // Vérifier le mot de passe
         const isValidPassword = await bcrypt.compare(credentials.password, user.password);
         if (!isValidPassword) {
           throw new Error("Mot de passe incorrect.");
@@ -43,13 +41,15 @@ const authOptions = {
     })
   ],
   callbacks: {
-    async session({ session, token }) {
+    async session({ session, token, role }) {
       session.user = token.user;
+      session.role = role.user;
       return session;
     },
-    async jwt({ token, user }) {
+    async jwt({ token, user, role }) {
       if (user) {
         token.user = user;
+        token.role = role; 
       }
       return token;
     }
