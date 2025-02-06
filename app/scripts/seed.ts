@@ -1,9 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { bcrypt } from 'bcrypt';
+import { supabase } from "../lib/db";
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function seed() {
   const hashedPassword = await bcrypt.hash("password", 10);
